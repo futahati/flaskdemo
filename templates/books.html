@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>書店首頁</title>
+
+    <style>
+        body {
+            background-color: floralwhite;
+            text-align: center;
+        }
+
+        .price {
+            background-color: burlywood;
+            padding: 6px;
+            margin: 6px 0px;
+            color: azure;
+        }
+
+        .bookname {
+            font-size: 20px;
+            font-weight: bold;
+            background-color: aquamarine;
+            width: 200px;
+            margin: 0 auto;
+            border-radius: 12px;
+            padding: 12px 0px;
+        }
+
+        .bookimage {
+            width: 250px;
+            border-radius: 12px;
+            border: 1px brown solid;
+            padding: 6px 0px;
+            margin: 6px auto;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <h1
+        style="font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;font-size: 48px;">
+        目前書籍</h1>
+    <!-- {{books}} -->
+
+
+    {% for key in books %}
+
+    <!-- 此法亦可使用
+    {{books[key]["name"]}}
+    {{books[key]["price"]}}
+    {{books[key]["image_url"]}} -->
+    <div class="bookname">{{books[key].name}}</div>
+    <div class="price">NT:{{books[key].price}}</div>
+    <img class="bookimage" src="{{books[key].image_url}}" alt="">
+
+    <button>購買</button>
+    <hr>
+
+    {% endfor %}
+
+
+
+</body>
+
+</html>
