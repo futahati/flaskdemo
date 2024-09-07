@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from datetime import datetime
 from scrape import scrape_stocks, scrape_pm25
 
@@ -26,10 +26,27 @@ books = {
 
 
 # PM25
-@app.route("/pm25")
+@app.route("/pm25", methods=["GET", "POST"])
 def get_pm25():
+    # GET
+    print(request.args)
+    # POST
+    print(request.form)
     today = datetime.now()
-    columns, values = scrape_pm25()
+
+    sort = False
+    ascending = True
+
+    if request.method == "POST":
+        # 判斷是否按下排序按鈕
+        if "sort" in request.form:
+            sort = True
+            # print("sort")
+            # 取得 select 的 option
+            ascending = True if request.form.get("sort") == "true" else False
+            # print(ascending)
+
+    columns, values = scrape_pm25(sort, ascending)
     data = {
         "columns": columns,
         "values": values,
