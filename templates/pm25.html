@@ -61,7 +61,7 @@
     <div class="panel1">
         <input type="checkbox" name="" id="check-reload">
         開啟
-        <input type="number" name="" id="reload-sec" value="30">
+        <input type="number" name="" id="reload-sec">
         秒數
     </div>
 
@@ -71,6 +71,7 @@
             <option value="false">降 【由大至小】</option>
         </select>
         <button type="submit" class="button-style">排序 PM25</button>
+        <button type="submit" class="button-style">排序 county</button> <!-- 測試 -->
     </form>
 
     <!-- {{data["columns"]}} -->
@@ -101,39 +102,50 @@
     <script>
         const checkReload = document.querySelector("#check-reload");
         const reloadSecond = document.querySelector("#reload-sec");
-        const delaySecond = 30;
-        reloadSecond.value = delaySecond;
+        const delaySecond = 60;
 
         console.log(checkReload, reloadSecond);
 
         window.onload = function () {
 
             console.log("reload!");
-            checkReload.checked = localStorage.getItem("CheckReload") ? true : false;
-            reloadSecond.value = localStorage.getItem("ReloadSecond") ? localStorage.getItem("ReloadSecond") : delaySecond;
+            // 讀取
+            checkReload.checked = sessionStorage.getItem("CheckReload") == "true";
+            reloadSecond.value = sessionStorage.getItem("ReloadSecond") ? sessionStorage.getItem("ReloadSecond") : delaySecond;
 
             SetUpdateInterval();
 
         };
 
         checkReload.addEventListener("change", () => {
-
-            console.log(checkReload.checked, reloadSecond.value);
-
-            localStorage.setItem("CheckReload", checkReload.checked);
-            localStorage.setItem("ReloadSecond", reloadSecond.value);
-
+            // 儲存
+            sessionStorage.setItem("CheckReload", checkReload.checked);
             SetUpdateInterval();
 
         });
 
+        reloadSecond.addEventListener("input", () => {
+
+            checkReload.checked = false;
+            sessionStorage.setItem("CheckReload", checkReload.checked);
+            sessionStorage.setItem("ReloadSecond", reloadSecond.value);
+
+        });
+
+
+
+        let intervalId = null;
         function SetUpdateInterval() {
             if (checkReload.checked) {
                 console.log("start reload!");
                 let sec = Number(reloadSecond.value) * 1000;
-                setInterval((() => {
+                // 取得對應 Id
+                intervalId = setInterval((() => {
                     window.location.reload();
                 }), sec);
+            } else {
+                // 清除 interval
+                clearInterval(intervalId);
             }
         }
 
