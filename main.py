@@ -31,7 +31,7 @@ def pm25_chart():
     return render_template("pm25-chart.html")
 
 
-@app.route("six-pm25-data")
+@app.route("/six-pm25-data")
 def six_pm25_data():
     try:
         json_data = get_six_pm25_json()
@@ -52,10 +52,25 @@ def pm25_data():
 
 
 # PM25
-@app.route("/pm25")
+@app.route("/pm25", methods=["GET", "POST"])
 def get_pm25():
+    # GET
+    print(request.args)
+    # POST
+    print(request.form)
     today = datetime.now()
-    columns, values = scrape_pm25()
+
+    sort = False
+    ascending = True
+
+    if request.method == "POST":
+        # 判斷是否按下排序按鈕
+        if "sort" in request.form:
+            sort = True
+            # 取得select的option
+            ascending = True if request.form.get("sort") == "true" else False
+
+    columns, values = scrape_pm25(sort, ascending)
     data = {
         "columns": columns,
         "values": values,
