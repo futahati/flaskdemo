@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 from datetime import datetime
-from scrape import scrape_stocks, scrape_pm25
+from scrape import scrape_stocks, scrape_pm25, get_pm25_json, get_six_pm25_json
 
 # print(__name__)
 
@@ -23,6 +23,32 @@ books = {
         "image_url": "https://im1.book.com.tw/image/getImage?i=https://www.books.com.tw/img/001/036/04/0010360466.jpg&v=62d695bak&w=348&h=348",
     },
 }
+
+
+# PM25_data
+@app.route("/pm25-chart")
+def pm25_chart():
+    return render_template("pm25-chart.html")
+
+
+@app.route("six-pm25-data")
+def six_pm25_data():
+    try:
+        json_data = get_six_pm25_json()
+        return json.dumps(json_data, ensure_ascii=False)
+    except Exception as e:
+        print(e)
+        return json.dumps({"result": "failure", "exception": str(e)})
+
+
+@app.route("/pm25-data")
+def pm25_data():
+    try:
+        json_data = get_pm25_json()
+        return json.dumps(json_data, ensure_ascii=False)
+    except Exception as e:
+        print(e)
+        return json.dumps({"result": "failure", "exception": str(e)})
 
 
 # PM25

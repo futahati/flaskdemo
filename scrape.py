@@ -1,13 +1,80 @@
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
+
+url = "https://data.moenv.gov.tw/api/v2/aqx_p_02?api_key=e8dd42e6-9b8b-43f8-991e-b3dee723a52d&limit=1000&sort=datacreationdate%20desc&format=JSON"
+six_countys = ["臺北市", "新北市", "桃園市", "臺中市", "臺南市", "高雄市"]
+df = None
+
+
+def get_six_pm25_json():
+    columns, values = scrape_six_pm25()
+    json_data = {"site": columns, "pm25": values}
+
+    return json_data
+
+
+def get_pm25_json():
+    columns, values = scrape_pm25()
+
+    xdata = [value[0] for value in values]
+    ydata = [value[2] for value in values]
+
+    json_data = {"site": xdata, "pm25": ydata}
+
+    datas = list(zip(xdata, ydata))
+
+    datas = sorted(datas, key=lambda x: x[1])
+
+    json_data = {"site": xdata, "pm25": ydata, "highest": datas[-1], "lowest": datas[0]}
+
+    return json_data
+
+
+def convert_value(value):
+    try:
+        return eval(value)
+    except:
+        return None
+
+
+def get_pm25_data():
+    global df
+    if df is None:
+        datas = requests.get(url).json()["records"]
+        df = pd.DataFrame(datas)
+        df["pm25"] = df["pm25"].apply(convert_value)
+
+        df = df.dropna()
+
+    return df
+
+
+def scrape_six_pm25():
+    pm25 = []
+    try:
+        df = get_pm25_data()
+        for county in six_countys:
+            avg_pm25 = df.groupby("county").get_group(county)["pm25"].mean()
+            pm25.append(round(avg_pm25, 2))
+
+        columns = six_countys
+        values = pm25
+
+        return columns, values
+
+    except Exception as e:
+        print(e)
+
+    return None, 404
 
 
 def scrape_pm25():
     url = "https://data.moenv.gov.tw/api/v2/aqx_p_02?api_key=e8dd42e6-9b8b-43f8-991e-b3dee723a52d&limit=1000&sort=datacreationdate%20desc&format=JSON"
     try:
-        datas = requests.get(url).json()["records"]
-        columns = list(datas[0].keys())
-        values = [list(data.values()) for data in datas]
+        df = get_pm25_data()
+        columns = df.columns
+        values = df.values
 
         return columns, values
 
@@ -44,4 +111,5 @@ def scrape_stocks():
 
 if __name__ == "__main__":
     # print(scrape_stocks())
-    print(scrape_pm25())
+    # print(scrape_pm25())
+    print(get_pm25_json())
